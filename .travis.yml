@@ -4,8 +4,7 @@ python:
 install: "pip install ."
 before_script: pip install coveralls
 script:
-    - "py.test"
-    - "coverage run --source=addict setup.py test"
+    - "runtests.py"
 after_success:
     - coveralls
 

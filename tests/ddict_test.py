@@ -4,6 +4,7 @@ import pytest
 import ddict
 import ddict.ddict
 
+from ddict import DotAccessDict
 Dict = ddict.DotAccessDict
 
 

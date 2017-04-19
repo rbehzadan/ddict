@@ -26,41 +26,6 @@ __status__ = 'development'
 import re
 
 
-data = """
-{
-  "families": {
-    "members": [
-      ["Ricardo", "Alexis", "Victor"],
-      [["Shanaya", "Sherry"], "Mary", "Mateo", "Zoe"]
-    ],
-    "family1": "O'Barian",
-    "family2": "Solloway"
-  },
-  "proxies": [
-    {"http": "192.168.0.1:8080", "https": "192.168.0.1:8081"},
-    {"http": "192.168.1.1:8080", "https": "192.168.1.1:8081"},
-    [
-      "192.168.2.1", "192.168.3.1", "192.168.4.1",
-      "192.168.5.1", "192.168.6.1", "192.168.7.1"
-    ]
-  ],
-  "databases": {
-    "mongodb": {
-      "url": "mongodb://localhost:27017",
-      "host": "localhost",
-      "port": 27017,
-      "username": "user",
-      "password": "pass"
-    },
-    "redis": {
-      "url": "redis://localhost"
-    }
-  }
-}
-"""
-import json
-data = json.loads(data)
-
 
 def _enumerate(obj):
     """enumerate lists (with indexes) and dicts (with keys)
