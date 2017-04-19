@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/rbehzadan/ddict.svg?branch=master)](https://travis-ci.org/rbehzadan/ddict)
+[![Coverage Status](https://coveralls.io/repos/github/rbehzadan/ddict/badge.svg)](https://coveralls.io/github/rbehzadan/ddict)
 # DotAccessDict
 
 DotAccessDict class can handle nested dictionaries with arbitray number of

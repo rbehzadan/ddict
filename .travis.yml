@@ -1,7 +1,7 @@
 language: python
 python:
   - "3.6"
-#install: "pip install ."
+install: "pip install ."
 before_script: pip install coveralls
 script:
     - "py.test"
