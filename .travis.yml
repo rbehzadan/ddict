@@ -4,7 +4,7 @@ python:
 install: "pip install ."
 before_script: pip install coveralls
 script:
-    - "runtests.py"
+    - "./runtests.py"
 after_success:
     - coveralls
 
