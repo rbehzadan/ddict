@@ -63,11 +63,11 @@ flats = [data01_flat, data02_flat]
 def test1():
     q={'reza':12, '123':24, (1,2):11}
     with pytest.raises(TypeError):
-        ddict.ddict._flatten(q)
+        ddict.ddict.flatten(q)
 
 def test2():
     with pytest.raises(TypeError):
-        ddict.ddict._flatten(data02)
+        ddict.ddict.flatten(data02)
 
 class TestDotAccessDict():
 
@@ -119,7 +119,7 @@ class TestDotAccessDict():
         assert a.families.members[1][0][0] == 'Shanaya'
 
     def test9(self):
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             a = Dict(data02)
 
     def test10(self):
@@ -173,4 +173,33 @@ class TestDotAccessDict():
         a.person.name = 'Jack'
         a.person.age = 18
         assert a.person == dict(name='Jack', age=18)
+
+    def test19(self):
+        a = Dict(name='John', age=12)
+        b = dict(name='John', age=12)
+        assert a.to_dict() == b
+        c = Dict(('name', 'John'), ('age', 12))
+        assert c.to_dict() == b
+        d = Dict([('name', 'John'), ('age', 12)])
+        assert d.to_dict() == b
+
+    def test20(self):
+        a = Dict()
+        assert a.get('person.age') == None
+        assert a.get('person.age', 24) == 24
+
+    def test21(self):
+        a = Dict()
+        a.person.name = 'John'
+        a.person.age = 32
+        joe = dict(name='Joe', age=18)
+        a.person.brothers = [joe, 'Jim', 'Jack']
+        b = Dict()
+        b.person.age = 24
+        a.update(b)
+        assert a.person.age == 24
+
+    def test22(self):
+        a = Dict(None)
+        assert a.to_dict() == {}
 

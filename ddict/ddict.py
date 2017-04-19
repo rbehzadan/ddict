@@ -16,7 +16,7 @@ __author__ = 'Reza Behzadan'
 __email__ = 'rbehzadan@gmail.com'
 __copyright__ = 'Copyright © 2017 Reza Behzadan'
 __date__ = '2017-01-16'
-__modified__ = '2017-04-17'
+__modified__ = '2017-04-19'
 
 __license__ = 'MIT'
 __version__ = '0.0.1'
@@ -92,7 +92,7 @@ def _flatten_helper(obj, path=''):
             items.append((new_path, v))
     return items
 
-def _flatten(d):
+def flatten(d):
     """Return dict of flatten nested dict
     """
     if not isinstance(d, dict):
@@ -105,19 +105,28 @@ class DotAccessDict(dict):
     _valid_key_pat = re.compile(
             '^([A-Za-z_]+\d*(\[\-?\d+?\])*)(\.[A-Za-z_]+\d*(\[\-?\d+?\])*)*$')
 
-    def __init__(self, d=None):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        if d is not None:
-            if not isinstance(d, dict):
-                raise TypeError('Need dict like object.')
-            self._parse(d)
+        for arg in args:
+            if not arg:
+                continue
+            elif isinstance(arg, dict):
+                for key, val in arg.items():
+                    self[key] = val
+            elif isinstance(arg, tuple) and (not isinstance(arg[0], tuple)):
+                self[arg[0]] = arg[1]
+            else:
+                for key, val in iter(arg):
+                    self[key] = val
+        for key, val in kwargs.items():
+            self[key] = val
 
     @classmethod
-    def _parse_list_like_object(cls, lst_obj):
+    def __parse_list_like_object(cls, lst_obj):
         items = []
         for i in lst_obj:
             if isinstance(i, (set, tuple, list)):
-                v = cls._parse_list_like_object(i)
+                v = cls.__parse_list_like_object(i)
             elif isinstance(i, cls):
                 v = i
             elif isinstance(i, dict):
@@ -127,30 +136,18 @@ class DotAccessDict(dict):
             items.append(v)
         return items
 
-    def _parse(self, d):
-        cls = self.__class__
-        for k, v in d.items():
-            if isinstance(v, cls):
-                self[k] = v
-            elif isinstance(v, dict):
-                self[k] = cls(v)
-            elif isinstance(v, (set, tuple, list)):
-                self[k] = cls._parse_list_like_object(v)
-            else:
-                self[k] = v
-
     def update(self, other):
         cls = self.__class__
         if not isinstance(other, (cls, dict)):
             raise TypeError('Need dict like object.')
-        for k in other:
+        for k, v in other.items():
             if k not in self:
-                self[k] = other[k]
+                self[k] = v
             elif isinstance(self[k], cls) and \
-                 isinstance(other[k], (cls, dict)):
-                self[k].update(other[k])
+                 isinstance(v, (cls, dict)):
+                self[k].update(v)
             else:
-                self[k] = other[k]
+                self[k] = v
 
     def get(self, key, d=None):
         cls = self.__class__
@@ -183,7 +180,7 @@ class DotAccessDict(dict):
             exec('self.%s=%s' % (key, value))
 
     def flatten(self):
-        return _flatten(self)
+        return flatten(self)
 
     @classmethod
     def _to_dict_helper(cls, lst):
@@ -209,17 +206,21 @@ class DotAccessDict(dict):
                 d[k] = v
         return d
 
-    def __setattr__(self, key, value):
+    def __set(self, key, value):
         cls = self.__class__
         if isinstance(value, dict) and not isinstance(value, cls):
-            self[key] = cls(value)
+            val = cls(value)
         elif isinstance(value, (list, tuple, set)):
-            self[key] = cls._parse_list_like_object(value)
+            val = cls.__parse_list_like_object(value)
         else:
-            self[key] = value
+            val = value
+        super().__setitem__(key, val)
+
+    def __setattr__(self, key, value):
+        self.__set(key, value)
 
     def __setitem__(self, key, value):
-        super().__setitem__(key, value)
+        self.__set(key, value)
 
     def __getattr__(self, key):
         cls = self.__class__
