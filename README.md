@@ -6,7 +6,7 @@ dicts and lists, nested inside each other.
 
 ### Usage:
 
-```
+```Python
 >>> from ddict import DotAccessDict
 >>> d = DotAccessDict()
 >>> d
