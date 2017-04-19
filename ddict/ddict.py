@@ -210,7 +210,13 @@ class DotAccessDict(dict):
         return d
 
     def __setattr__(self, key, value):
-        self[key] = value
+        cls = self.__class__
+        if isinstance(value, dict) and not isinstance(value, cls):
+            self[key] = cls(value)
+        elif isinstance(value, (list, tuple, set)):
+            self[key] = cls._parse_list_like_object(value)
+        else:
+            self[key] = value
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
