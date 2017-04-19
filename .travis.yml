@@ -1,5 +1,11 @@
 language: python
 python:
   - "3.6"
-install: "pip install ."
-script: pytest
+#install: "pip install ."
+before_script: pip install coveralls
+script:
+    - "py.test"
+    - "coverage run --source=addict setup.py test"
+after_success:
+    - coveralls
+
