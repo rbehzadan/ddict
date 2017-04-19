@@ -1,9 +1,8 @@
 [![Build Status](https://travis-ci.org/rbehzadan/ddict.svg?branch=master)](https://travis-ci.org/rbehzadan/ddict)
 # DotAccessDict
-Dict class with dot notation (like attributes) for accessing nested values
 
 DotAccessDict class can handle nested dictionaries with arbitray number of
-dicts and lists nested inside each other.
+dicts and lists, nested inside each other.
 
 ### Usage:
 
