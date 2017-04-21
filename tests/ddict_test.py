@@ -147,6 +147,21 @@ class TestDotAccessDict():
         a = Dict(d)
         assert a.to_dict() == d
 
+    def test_constructor04(self):
+        jack = Dict(name='Jack', age=5)
+        john = Dict(name='John', age=34, son=jack)
+        d = {'age': 34, 'name': 'John', 'son': {'age': 5, 'name': 'Jack'}}
+        assert john.to_dict() == d
+
+    def test_constructor05(self):
+        jack = Dict(name='Jack', age=5)
+        joe = Dict(name='Joe', age=2)
+        john = Dict(name='John', age=34, sons=[jack, joe])
+        d = {'age': 34,
+             'name': 'John',
+             'sons': [{'age': 5, 'name': 'Jack'}, {'age': 2, 'name': 'Joe'}]}
+        assert john.to_dict() == d
+
     def test_constructor_kwargs_01(self):
         d = dict(name='Joe', age=18)
         a = Dict(name='Joe', age=18)
@@ -246,6 +261,15 @@ class TestDotAccessDict():
         a.update(b)
         assert d.to_dict() == a
         
+    def test_get_bad_args(self):
+        d = Dict(john)
+        with pytest.raises(SyntaxError):
+            d.get('children[+0][0].age') == 18
+        with pytest.raises(SyntaxError):
+            d.get('children [0][0].age') == 18
+        with pytest.raises(SyntaxError):
+            d.get('children(0)[0].age') == 18
+
     def test_get_01(self):
         d = Dict(john)
         assert d.get('age') == 55
@@ -255,6 +279,10 @@ class TestDotAccessDict():
         assert d.get('children[0][0].brother.sex') == 'M'
         assert d.get('children[0][0].name') == 'Joe'
         assert d.get('children[0][0].sex') == 'M'
+
+    def test_get_bad_index(self):
+        d = Dict(john)
+        assert d.get('children[5][0].age') == None
         
     def test_set_01(self):
         d = Dict(john)
@@ -274,6 +302,30 @@ class TestDotAccessDict():
         assert d.get('children[0][0].brother.name') == 'Jack'
         d.set('children[0][0].brother.name', 'Quba')
         assert d.get('children[0][0].brother.name') == 'Quba'
+
+    def test_set_bad_args(self):
+        d = Dict(john)
+        with pytest.raises(SyntaxError):
+            d.set('children[+1][0].age', 123)
+
+    def test_set_bad_index(self):
+        d = Dict(john)
+        with pytest.raises(IndexError):
+            d.set('children[0][2].age', 123)
+
+    def test_set_odd_key(self):
+        d = Dict({7.5:5})
+        assert d['7.5'] == 5
+        with pytest.raises(SyntaxError):
+            d.get('7.5')
+
+    def test_getitem_01(self):
+        a = Dict()
+        assert a.person == Dict({})
+
+    def test_flatten_01(self):
+        d = Dict(john)
+        assert d.flatten() == john_flat
 
     def test_dir_01(self):
         d = Dict(john)
