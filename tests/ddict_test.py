@@ -67,6 +67,11 @@ jack2 = {
       ['Alice', 'Ruby']]
 }
 
+
+def test_doc():
+    assert len(ddict.ddict.__doc__) > 1
+
+
 def test__enumerate_bad_args():
     assert list(enum(12)) == []
     assert list(enum('jack')) == []
