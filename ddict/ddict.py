@@ -5,6 +5,19 @@ Provides DotAccessDict class which makes accessing dict items by dot notation.
 DotAccessDict class can handle nested dictionaries with arbitray number of
 dicts and lists nested inside each other.
 
+Notes:
+  - As nested elements can be constructed with dot notation, the return value
+    of non existing attribute/key is DotAccessDict
+  - All key/attributes that are not int or str, will be converted to str
+  - Multiple arguments in constructor, update the values of existing keys and
+    not replace them.
+  - 
+
+
+
+TODO:
+  - PEP 363 -- Syntax For Dynamic Attribute Access
+
 Similar works:
  - https://github.com/mewwts/addict
  - https://github.com/makinacorpus/easydict
@@ -19,13 +32,17 @@ __date__ = '2017-01-16'
 __modified__ = '2017-04-19'
 
 __license__ = 'MIT'
-__version__ = '0.0.1'
+__version__ = '0.0.4'
 __status__ = 'development'
 
 
 import re
 
 
+def isiterable(obj):
+    """Return True if ``obj`` is not str, and is iterable
+    """
+    return hasattr(obj, '__iter__') and not isinstance(obj, str)
 
 def _enumerate(obj):
     """enumerate lists (with indexes) and dicts (with keys)
@@ -36,49 +53,50 @@ def _enumerate(obj):
     elif isinstance(obj, dict):
         for k, v in obj.items():
             yield k, v
-    # else:
-        # return
 
-def _flatten_helper(obj, path=''):
-    myself = _flatten_helper
-    items = []
-    for k, v in _enumerate(obj):
-        if isinstance(k, int):
-            k = '[%s]' % k
-            new_path = path + k if path else k
-        else:
-            # TODO: could we use k=str(k) and replace whitespaces with _?
-            if not isinstance(k, str):
-                raise TypeError('Need ``str`` you gave ``%s``' % type(k))
-            new_path = path + '.' + k if path else k
-        if isinstance(v, (set, tuple, list, dict)):
-            items.extend(myself(v, new_path))
-        else:
-            items.append((new_path, v))
-    return items
-
-def flatten(d):
+def flatten(d, max_depth=10):
     """Return dict of flatten nested dict
     """
     if not isinstance(d, dict):
         raise TypeError('Need dict-like object')
+    def _flatten_helper(obj, path=''):
+        nonlocal max_depth
+        myself = _flatten_helper
+        items = []
+        for k, v in _enumerate(obj):
+            # note: k's (keys) are either int or str and nothing else
+            if isinstance(k, int):
+                k = '[%s]' % k
+                new_path = path + k if path else k
+            else:
+                new_path = path + '.' + k if path else k
+                if new_path.count('.') >= max_depth:
+                    continue
+            if isinstance(v, (set, tuple, list, dict)):
+                items.extend(myself(v, new_path))
+            else:
+                items.append((new_path, v))
+        return items
+    # print("---------> depth=%s"%depth)
     return dict(_flatten_helper(d))
 
 
 class DotAccessDict(dict):
     _index_pat = re.compile('\[(\-?\d+?)\]')
+    _valid_attr = re.compile('^[_a-zA-Z]+[_a-zA-Z0-9]*$')
     _valid_key_pat = re.compile(
             '^([A-Za-z_]+\d*(\[\-?\d+?\])*)(\.[A-Za-z_]+\d*(\[\-?\d+?\])*)*$')
 
     def __init__(self, *args, **kwargs):
+        cls = self.__class__
         super().__init__()
         for arg in args:
-            if not arg:
-                continue
-            elif isinstance(arg, dict):
-                for key, val in arg.items():
-                    self[key] = val
-            elif isinstance(arg, tuple) and (not isinstance(arg[0], tuple)):
+            if not isiterable(arg):
+                raise TypeError('Need collection')
+            if isinstance(arg, dict):
+                self.update(arg)
+            # elif isinstance(arg, tuple) and (not isinstance(arg[0], tuple)):
+            elif isinstance(arg, tuple):
                 self[arg[0]] = arg[1]
             else:
                 for key, val in iter(arg):
@@ -103,13 +121,12 @@ class DotAccessDict(dict):
 
     def update(self, other):
         cls = self.__class__
-        if not isinstance(other, (cls, dict)):
+        if not isinstance(other, dict):
             raise TypeError('Need dict like object.')
         for k, v in other.items():
             if k not in self:
                 self[k] = v
-            elif isinstance(self[k], cls) and \
-                 isinstance(v, (cls, dict)):
+            elif isinstance(self[k], cls) and isinstance(v, dict):
                 self[k].update(v)
             else:
                 self[k] = v
@@ -173,6 +190,8 @@ class DotAccessDict(dict):
 
     def __set(self, key, value):
         cls = self.__class__
+        if not isinstance(key, (str, int)):
+            key = str(key)
         if isinstance(value, dict) and not isinstance(value, cls):
             val = cls(value)
         elif isinstance(value, (list, tuple, set)):

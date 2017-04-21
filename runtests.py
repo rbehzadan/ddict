@@ -19,6 +19,7 @@ import pytest
 import ddict
 
 cov = coverage.coverage(branch=True, include='ddict/*')
+# cov = coverage.coverage(branch=True, source=['ddict'], include='ddict/*')
 cov.erase()
 cov.set_option('report:show_missing', True)
 cov.start()
