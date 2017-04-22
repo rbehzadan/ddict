@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-with open(path.join(here, 'README.md')) as f:
+with open(path.join(here, 'README.rst')) as f:
     long_description = f.read()
 
 setup(
     name='ddict',
-    version='0.1.1',
+    version='0.1.3',
     description='Dict class with dot notation (like attributes) for accessing nested values',
     long_description=long_description,
     url='https://github.com/rbehzadan/ddict',
@@ -28,7 +28,8 @@ setup(
     keywords='dict dot notation access',
 
     # packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    py_modules=["ddict"],
+    packages=['ddict'],
+    py_modules=['ddict'],
 
     install_requires=[],
 
