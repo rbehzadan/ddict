@@ -27,29 +27,18 @@ setup(
 
     keywords='dict dot notation access',
 
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-
-    # Alternatively, if you want to distribute just a my_module.py, uncomment
-    # this:
-    #   py_modules=["my_module"],
+    # packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    py_modules=["ddict"],
 
     install_requires=[],
 
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    # extras_require={
-        # 'dev': ['check-manifest'],
-        # 'test': ['pytest', 'pytest-cov'],
-    # },
+    # $ pip install -e .[dev]
+    extras_require={
+        'dev': ['pytest-cov'],
+    },
     setup_requires=[
         'pytest-runner',
-    ],
-    tests_require=[
-        'pytest',
         'pytest-cov'
     ],
-    # test_suite='pytest'
 )
 
